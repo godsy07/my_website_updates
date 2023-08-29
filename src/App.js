@@ -1,24 +1,27 @@
-import logo from './logo.svg';
-import './App.css';
+import { ToastContainer } from 'react-toastify';
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import MainPage from "./pages/main-page/MainPage";
+import LoginPage from "./pages/login-page/LoginPage";
+import Dashboard from './pages/auth/dashboard/Dashboard';
+import { AuthProvider } from './components/auth/AuthContext';
+import ProtectedRoutes from './components/auth/ProtectedRoutes';
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <BrowserRouter future={{ v7_startTransition: true }}>
+      <AuthProvider>
+        <ToastContainer />
+        <Routes>
+          <Route path="/" element={<MainPage />} />
+          <Route path="/admin_login" element={<LoginPage />} />
+
+          <Route path="/" element={<ProtectedRoutes />}>
+            <Route path="dashboard" element={<Dashboard />} />
+          </Route>
+
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
