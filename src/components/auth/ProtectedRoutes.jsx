@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from "../auth/AuthContext"
 import { Col, Row, Spinner } from 'react-bootstrap'
 import SideBar from '../sidebar/SideBar'
+import Swal from 'sweetalert2'
 
 const LazyOutletWrapper = lazy(() => import("../wrapper/OutletWrapper"))
 
@@ -46,7 +47,18 @@ const ProtectedRoutes = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     },[]);
 
-    const handleLogoutUser = () => {
+    const handleLogoutUser = async() => {
+        const confirm_logout = await Swal.fire({
+            title: 'Do you really want to logout?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Confirm Logout'
+        });
+        if (!confirm_logout.isConfirmed) return;
+
         userLogout();
         removeCookie("my_api_token")
         navigate("/admin_login")
