@@ -1,1 +1,5 @@
 
+.sidebar-nav-item:hover {
+    background-color:rgb(205, 240, 124) !important;
+    color: #000 !important;
+}

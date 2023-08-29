@@ -24,6 +24,11 @@ code {
   overflow-x: hidden;
 }
 
+a {
+  text-decoration: none;
+  color: #000;
+}
+
 /*** Styling for scroll bar STARTS here ***/
 
 *::-webkit-scrollbar {

@@ -2,6 +2,8 @@ import React from 'react'
 import { Navbar } from 'react-bootstrap'
 import SideBarOptions from './SideBarOptions'
 
+import "./sidebar.css"
+
 const SideBar = ({ logoutUser }) => {
   return (
     <div className='w-100 h-100'>
