@@ -2,8 +2,10 @@ import React from 'react'
 
 const ManageUsers = () => {
   return (
-    <div>
-      Manage Users
+    <div className='page-content-div'>
+      <div className='page-header'>
+        <h3>Manage Users</h3>
+      </div>
     </div>
   )
 }
