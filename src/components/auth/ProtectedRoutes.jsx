@@ -1,23 +1,24 @@
 import React, { lazy, Suspense, useEffect } from 'react'
 import jwtDecode from 'jwt-decode'
 import { useCookies } from 'react-cookie'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 
 import { useAuth } from "../auth/AuthContext"
 import { Col, Row, Spinner } from 'react-bootstrap'
 import SideBar from '../sidebar/SideBar'
 import Swal from 'sweetalert2'
+import ToastifyMessage from '../toast/ToastifyMessage'
 
 const LazyOutletWrapper = lazy(() => import("../wrapper/OutletWrapper"))
 
-const ProtectedRoutes = (props) => {
+const ProtectedRoutes = ({ accessible_to=['user'] }) => {
+    const location = useLocation();
     const navigate = useNavigate();
     const [cookies, removeCookie] = useCookies("my_api_token");
     
-    const { userLogin, userLogout } = useAuth();
+    const { authUser, userLogin, userLogout, isUserAuthenticated } = useAuth();
 
     useEffect(() => {
-        // Check if user is logged in or not, else redirect then to Dashboard
         if (cookies.my_api_token) {
             const token = cookies.my_api_token !== "undefined" ? cookies.my_api_token : null;
             if (token) {
@@ -30,7 +31,8 @@ const ProtectedRoutes = (props) => {
                         navigate("/admin_login")
                     } else {
                         // Save authenticated Details
-                        userLogin(decoded);
+                        if (!isUserAuthenticated()) userLogin(decoded);
+                        checkUserHasPageAccess(decoded);
                     }
                 } else {
                     userLogout();
@@ -46,6 +48,25 @@ const ProtectedRoutes = (props) => {
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     },[]);
+
+    useEffect(() => {
+        // Check if user is logged in or not, else redirect then to Dashboard
+        if (isUserAuthenticated()) {
+            checkUserHasPageAccess(authUser);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    },[location.pathname, authUser])
+
+    const checkUserHasPageAccess = (user_data) => {
+        if (!userHasPageAccess(user_data.user_type)) {
+            ToastifyMessage({ type: 'warning', message: 'You are not authorized to access this page.' })
+            navigate("/dashboard")
+        }
+    }
+
+    const userHasPageAccess = (user_type) => {
+        return accessible_to.includes(user_type)
+    }
 
     const handleLogoutUser = async() => {
         const confirm_logout = await Swal.fire({
@@ -72,7 +93,7 @@ const ProtectedRoutes = (props) => {
             </Col>
             <Col xs={12} sm={12} md={9} lg={10} className='p-0 m-0'>
                 <Suspense fallback={<div><Spinner animation='border' /></div>}>
-                    <LazyOutletWrapper {...props} />
+                    <LazyOutletWrapper />
                 </Suspense>
             </Col>
         </Row>
