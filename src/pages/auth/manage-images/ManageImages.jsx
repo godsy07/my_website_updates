@@ -1,11 +1,19 @@
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import React, { useState } from 'react'
-import { Button, Form, FormGroup, Modal } from 'react-bootstrap'
+import React, { useState, useEffect } from 'react'
+import { Button, Form, FormGroup, Modal, Table } from 'react-bootstrap'
 
 import {BASE_URL} from "../../../config/config"
 
 const ManageImages = () => {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [pageNo, setPageNo] = useState(1);
+  const [pageLimit, setPageLimit] = useState(40);
+
+  const [imageDataList, setImageDataList] = useState([]);
+  const [totalItems, setTotalItems] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+
   const [showAddImageModal, setShowAddImageModal] = useState(false);
   const [image, setImage] = useState(null);
   const [privateImage, setPrivateImage] = useState(false);
@@ -14,6 +22,10 @@ const ManageImages = () => {
     tags: '',
     description: '',
   });
+
+  useEffect(() => {
+    fetchFetchUserImages();
+  },[]);
 
   const  handleImageDataChange = (e) => {
     const {name, value} = e.target;
@@ -61,6 +73,26 @@ const ManageImages = () => {
           text: 'Something went wrong!!!',
         })
       }
+    }
+  }
+
+  const fetchFetchUserImages = async() => {
+    try {
+      const response = await axios.get(`${BASE_URL}/images/get-paginated-user-images?search_term=${searchTerm}&page_no=${pageNo}&page_limit=${pageLimit}&sort_data`,
+        {
+          withCredentials: true,
+        }
+      );
+      if (response.status === 200) {
+        // console.log("response", response)
+        setImageDataList([...response.data.data]);
+        setTotalItems(response.data.total_items);
+        setTotalPages(response.data.total_pages);
+      }
+
+    } catch(e) {
+      if (e.response) console.log(e.response)
+      else console.log(e)
     }
   }
 
@@ -115,8 +147,38 @@ const ManageImages = () => {
         <h3>Manage Images</h3>
       </div>
       <div className='page-content'>
-        <div className='d-flex justify-content-end'>
+        <div className='mb-3 d-flex justify-content-end'>
           <Button onClick={() => setShowAddImageModal(true)}>Add Image</Button>
+        </div>
+        <div className='mb-3'>
+          <Table striped bordered responsive>
+            <thead>
+              <tr>
+                <th>Sl.No</th>
+                <th>Title</th>
+                <th>Image</th>
+                <th>Private</th>
+                <th>Description</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {imageDataList.length === 0 ? (
+                <tr>
+                  <td colSpan={6}>No Image data exists.</td>
+                </tr>
+              ) : imageDataList.map((item, idx) => (
+                <tr key={idx}>
+                  <td>{idx + 1}</td>
+                  <td>{item.title}</td>
+                  <td>Image</td>
+                  <td>{item.private}</td>
+                  <td>{item.description}</td>
+                  <td>Action</td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
         </div>
       </div>
     </div>
