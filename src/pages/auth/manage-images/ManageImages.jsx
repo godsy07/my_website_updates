@@ -1,9 +1,9 @@
 import axios from 'axios';
 import Swal from 'sweetalert2';
 import React, { useState, useEffect } from 'react'
-import { Button, Form, FormGroup, Modal, Table } from 'react-bootstrap'
+import { Button, Form, FormGroup, Image, Modal, Table } from 'react-bootstrap'
 
-import {BASE_URL} from "../../../config/config"
+import { BASE_URL, BASE_UPLOAD_URL } from "../../../config/config"
 
 const ManageImages = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,12 +27,26 @@ const ManageImages = () => {
     fetchFetchUserImages();
   },[]);
 
+  useEffect(() => {
+    if (!showAddImageModal) resetAddImageData();
+  },[showAddImageModal]);
+
   const  handleImageDataChange = (e) => {
     const {name, value} = e.target;
     setImageDetails((prevData) => ({
       ...prevData,
       [name]: value,
     }));
+  }
+
+  const resetAddImageData = () => {
+    setImage(null);
+    setPrivateImage(false);
+    setImageDetails({
+      title: "",
+      tags: '',
+      description: '',
+    });
   }
 
   const uploadUserImage = async(e) => {
@@ -56,7 +70,15 @@ const ManageImages = () => {
         },
       );
       if (response.status === 200) {
-        console.log(response);
+        // console.log(response);
+        fetchFetchUserImages();
+        setShowAddImageModal(false);
+        resetAddImageData();
+        Swal.fire({
+          icon: 'success',
+          title: 'Success',
+          text: response.data.message,
+        })
       }
 
     } catch(e) {
@@ -171,8 +193,8 @@ const ManageImages = () => {
                 <tr key={idx}>
                   <td>{idx + 1}</td>
                   <td>{item.title}</td>
-                  <td>Image</td>
-                  <td>{item.private}</td>
+                  <td><Image src={`${BASE_UPLOAD_URL}/${item.file_path}`} alt={item.title} title={item.title} className='img-fluid' style={{ maxHeight: "30px", cursor: 'pointer' }} /> </td>
+                  <td>{item.private?"YES":'NO'}</td>
                   <td>{item.description}</td>
                   <td>Action</td>
                 </tr>
